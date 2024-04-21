@@ -11,3 +11,8 @@ dynamic = ["version", "description"]
 
 [project.urls]
 Home = "https://github.com/ev-br/empty"
+
+dependencies  = [
+    "numpy>=1.19.5",
+    "scipy",
+]
