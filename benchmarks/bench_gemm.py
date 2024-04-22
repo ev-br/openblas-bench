@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg.blas import dgemm
+from openblas_bench import dgemm
 
 class BlasL3:
 

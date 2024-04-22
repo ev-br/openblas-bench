@@ -1,6 +1,6 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
-import empty as proj
+import openblas_bench as proj
 
 class TimeSuite:
     """
