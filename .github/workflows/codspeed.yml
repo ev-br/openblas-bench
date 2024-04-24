@@ -11,21 +11,46 @@ on:
 
 jobs:
   benchmarks:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        pyver: ["3.11"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
-          python-version: "3.12"
+          python-version: ${{matrix.pyver}}
+
+      - name: Install OpenBLAS, generate the pkg-config
+        run: |
+          pip install scipy_openblas32 --user
+          python -c "import scipy_openblas32 as o; print(f'{o.__version__ = }')"
+          python -c "import scipy_openblas32 as o; pc = o.get_pkg_config(); f = open('scipy-openblas.pc', 'w'); f.write(pc)"
 
       - name: Install dependencies
-        run: pip install scipy numpy pytest pytest-codspeed
+        run: pip install meson ninja numpy pytest pytest-codspeed --user  # XXX build numpy instead
 
       - name: Build the wrapper
-        run: pip install -e .
+        run: |
+          export PKG_CONFIG_PATH=$PWD
+          meson setup build  --prefix=$PWD/build-install
+          meson install -C build
+          # This is needed because the build-install/_flapackXXX.so file
+          # does not link to scipy_openblas32
+          echo ">>> manually copy the .so from build -> build-install"
+          cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+
+      - name: Check the wrapper is importable
+        run: |
+          export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
+          cd pytest_benchmarks
+          python -c 'import openblas_wrap as o; print(f"{o.__file__ = }")'
 
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v2
         with:
           token: ${{ secrets.CODSPEED_TOKEN }}
-          run: OPENBLAS_NUM_THREADS=1 pytest pytest_benchmarks/bench_blas.py --codspeed
+          run: |
+            export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
+            OPENBLAS_NUM_THREADS=1 pytest pytest_benchmarks/bench_blas.py --codspeed
