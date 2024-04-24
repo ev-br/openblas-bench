@@ -65,13 +65,13 @@ subroutine scipy_<prefix>axpy(n,a,x,offx,incx,y,offy,incy)
 
 end subroutine <prefix>axpy
 
-function ddot(n,x,offx,incx,y,offy,incy) result (xy)
+function scipy_ddot(n,x,offx,incx,y,offy,incy) result (xy)
   ! Computes a vector-vector dot product.
 
-  callstatement ddot_return_value = (*f2py_func)(&n,x+offx,&incx,y+offy,&incy)
+  callstatement scipy_ddot_return_value = (*f2py_func)(&n,x+offx,&incx,y+offy,&incy)
   callprotoargument F_INT*,double*,F_INT*,double*,F_INT*
-  intent(c) ddot
-  fortranname F_FUNC(ddot,DDOT)
+  intent(c) scipy_ddot
+  fortranname F_FUNC(scipy_ddot,DDOT)
 
   double precision dimension(*), intent(in) :: x
   double precision dimension(*), intent(in) :: y
@@ -90,14 +90,14 @@ function ddot(n,x,offx,incx,y,offy,incy) result (xy)
 end function ddot
 
 
-function <prefix4>nrm2(n,x,offx,incx) result(n2)
+function scipy_<prefix4>nrm2(n,x,offx,incx) result(n2)
 
   <ftypereal4> <prefix4>nrm2, n2
 
-  callstatement <prefix4>nrm2_return_value = (*f2py_func)(&n,x+offx,&incx)
+  callstatement scipy_<prefix4>nrm2_return_value = (*f2py_func)(&n,x+offx,&incx)
   callprotoargument F_INT*,<ctype4>*,F_INT*
-  intent(c) <prefix4>nrm2
-  fortranname F_FUNC(<prefix4>nrm2,<D,DZ>NRM2)
+  intent(c) scipy_<prefix4>nrm2
+  fortranname F_FUNC(scipy_<prefix4>nrm2,<D,DZ>NRM2)
 
   <ftype4> dimension(*),intent(in) :: x
 
@@ -116,7 +116,7 @@ end function <prefix4>nrm2
 !
 
 
-subroutine <prefix>gemm(m,n,k,alpha,a,b,beta,c,trans_a,trans_b,lda,ka,ldb,kb)
+subroutine scipy_<prefix>gemm(m,n,k,alpha,a,b,beta,c,trans_a,trans_b,lda,ka,ldb,kb)
   ! Computes a scalar-matrix-matrix product and adds the result to a
   ! scalar-matrix product.
   !
@@ -151,7 +151,7 @@ subroutine <prefix>gemm(m,n,k,alpha,a,b,beta,c,trans_a,trans_b,lda,ka,ldb,kb)
 end subroutine <prefix>gemm
 
 
-subroutine <prefix6><sy,\0,\0,\0,he,he>rk(n,k,alpha,a,beta,c,trans,lower,lda,ka)
+subroutine scipy_<prefix6><sy,\0,\0,\0,he,he>rk(n,k,alpha,a,beta,c,trans,lower,lda,ka)
   !  performs one of the symmetric rank k operations
   !     C := alpha*A*A**T + beta*C,  or   C := alpha*A**T*A + beta*C,
   !
@@ -185,7 +185,7 @@ end subroutine <prefix6><sy,\0,\0,\0,he,he>rk
 ! LAPACK
 !
 
-subroutine <prefix>gesv(n,nrhs,a,piv,b,info)
+subroutine scipy_<prefix>gesv(n,nrhs,a,piv,b,info)
     ! lu,piv,x,info = gesv(a,b,overwrite_a=0,overwrite_b=0)
     ! Solve A * X = B.
     ! A = P * L * U
