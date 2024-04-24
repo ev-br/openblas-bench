@@ -40,6 +40,11 @@ py3.extension_module('_flapack',
   link_args: [],  # version_link_args,
   dependencies: [openblas_dep, fortranobject_dep],
   install: true,
-  subdir: 'openblas_wrap/openblas_wrap'
+  subdir: 'openblas_wrap'
 )
 
+
+py3.install_sources(
+  ['__init__.py'],
+  subdir: 'openblas_wrap'
+)
