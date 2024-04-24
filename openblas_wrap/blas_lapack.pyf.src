@@ -43,7 +43,7 @@ python module _flapack
 interface
 
 
-subroutine <prefix>axpy(n,a,x,offx,incx,y,offy,incy)
+subroutine scipy_<prefix>axpy(n,a,x,offx,incx,y,offy,incy)
   ! Calculate z = a*x+y, where a is scalar.
 
   callstatement (*f2py_func)(&n,&a,x+offx,&incx,y+offy,&incy)
