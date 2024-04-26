@@ -23,4 +23,6 @@ from ._flapack import (
     scipy_dgesv as dgesv,
     # linalg.svd
     scipy_dgesdd as dgesdd, scipy_dgesdd_lwork as dgesdd_lwork,
+    # linalg.eigh
+    scipy_dsyev as dsyev, scipy_dsyev_lwork as dsyev_lwork
 )
