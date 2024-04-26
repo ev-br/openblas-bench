@@ -51,9 +51,11 @@ jobs:
 
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v2
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+          PYTHONPATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/
+          OPENBLAS_NUM_THREADS: 1
         with:
           token: ${{ secrets.CODSPEED_TOKEN }}
           run: |
-            export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
-            export LD_LIBRARY_PATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
-            OPENBLAS_NUM_THREADS=1 pytest pytest_benchmarks/bench_blas.py --codspeed
+            pytest pytest_benchmarks/bench_blas.py --codspeed
