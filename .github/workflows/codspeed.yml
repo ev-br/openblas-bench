@@ -41,7 +41,7 @@ jobs:
           # This is needed because the build-install/_flapackXXX.so file
           # does not link to scipy_openblas32
           echo ">>> manually copy the .so from build -> build-install"
-          cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+          ### cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
 
       - name: Check the wrapper is importable
         run: |
@@ -55,4 +55,5 @@ jobs:
           token: ${{ secrets.CODSPEED_TOKEN }}
           run: |
             export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
+            export LD_LIBRARY_PATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
             OPENBLAS_NUM_THREADS=1 pytest pytest_benchmarks/bench_blas.py --codspeed
