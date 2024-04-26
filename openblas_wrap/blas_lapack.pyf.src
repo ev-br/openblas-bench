@@ -63,7 +63,7 @@ subroutine scipy_<prefix>axpy(n,a,x,offx,incx,y,offy,incy)
   check(len(x)-offx>(n-1)*abs(incx)) :: n
   check(len(y)-offy>(n-1)*abs(incy)) :: n
 
-end subroutine <prefix>axpy
+end subroutine scipy_<prefix>axpy
 
 function scipy_ddot(n,x,offx,incx,y,offy,incy) result (xy)
   ! Computes a vector-vector dot product.
@@ -87,7 +87,7 @@ function scipy_ddot(n,x,offx,incx,y,offy,incy) result (xy)
   check(len(x)-offx>(n-1)*abs(incx)) :: n
   check(len(y)-offy>(n-1)*abs(incy)) :: n
 
-end function ddot
+end function scipy_ddot
 
 
 function scipy_<prefix4>nrm2(n,x,offx,incx) result(n2)
@@ -109,7 +109,7 @@ function scipy_<prefix4>nrm2(n,x,offx,incx) result(n2)
   integer optional,intent(in),depend(x,incx,offx) :: n = (len(x)-offx)/abs(incx)
   check(len(x)-offx>(n-1)*abs(incx)) :: n
 
-end function <prefix4>nrm2
+end function scipy_<prefix4>nrm2
 
 !
 ! Level 3 BLAS
@@ -148,7 +148,7 @@ subroutine scipy_<prefix>gemm(m,n,k,alpha,a,b,beta,c,trans_a,trans_b,lda,ka,ldb,
   integer depend(b,trans_b,kb,ldb,k),intent(hide),check(trans_b?kb==k:ldb==k) :: &
        n = (trans_b?ldb:kb)
 
-end subroutine <prefix>gemm
+end subroutine scipy_<prefix>gemm
 
 
 subroutine scipy_<prefix6><sy,\0,\0,\0,he,he>rk(n,k,alpha,a,beta,c,trans,lower,lda,ka)
@@ -178,7 +178,7 @@ subroutine scipy_<prefix6><sy,\0,\0,\0,he,he>rk(n,k,alpha,a,beta,c,trans,lower,l
   integer depend(a, trans, ka, lda), intent(hide) :: n = (trans ? ka : lda)
   integer depend(a, trans, ka, lda), intent(hide) :: k = (trans ? lda : ka)
 
-end subroutine <prefix6><sy,\0,\0,\0,he,he>rk
+end subroutine scipy_<prefix6><sy,\0,\0,\0,he,he>rk
 
 
 !
@@ -205,6 +205,65 @@ subroutine scipy_<prefix>gesv(n,nrhs,a,piv,b,info)
     intent(in,out,copy,out=lu) a
 end subroutine <prefix>gesv
 
+
+subroutine scipy_<prefix2>gesdd(m,n,minmn,u0,u1,vt0,vt1,a,compute_uv,full_matrices,u,s,vt,work,lwork,iwork,info)
+    ! u,s,vt,info = gesdd(a,compute_uv=1,lwork=..,overwrite_a=0)
+    ! Compute the singular value decomposition (SVD) using divide and conquer:
+    !   A = U * SIGMA * transpose(V)
+    ! A - M x N matrix
+    ! U - M x M matrix or min(M,N) x N if full_matrices=False
+    ! SIGMA - M x N zero matrix with a main diagonal filled with min(M,N)
+    !               singular values
+    ! transpose(V) - N x N matrix or N x min(M,N) if full_matrices=False
+
+    callstatement (*f2py_func)((compute_uv?(full_matrices?"A":"S"):"N"),&m,&n,a,&m,s,u,&u0,vt,&vt0,work,&lwork,iwork,&info)
+    callprotoargument char*,F_INT*,F_INT*,<ctype2>*,F_INT*,<ctype2>*,<ctype2>*,F_INT*,<ctype2>*,F_INT*,<ctype2>*,F_INT*,F_INT*,F_INT*
+
+    integer intent(in),optional,check(compute_uv==0||compute_uv==1):: compute_uv = 1
+    integer intent(in),optional,check(full_matrices==0||full_matrices==1):: full_matrices = 1
+    integer intent(hide),depend(a):: m = shape(a,0)
+    integer intent(hide),depend(a):: n = shape(a,1)
+    integer intent(hide),depend(m,n):: minmn = MIN(m,n)
+    integer intent(hide),depend(compute_uv,minmn) :: u0 = (compute_uv?m:1)
+    integer intent(hide),depend(compute_uv,minmn, full_matrices) :: u1 = (compute_uv?(full_matrices?m:minmn):1)
+    integer intent(hide),depend(compute_uv,minmn, full_matrices) :: vt0 = (compute_uv?(full_matrices?n:minmn):1)
+    integer intent(hide),depend(compute_uv,minmn) :: vt1 = (compute_uv?n:1)
+    <ftype2> dimension(m,n),intent(in,copy,aligned8) :: a
+    <ftype2> dimension(minmn),intent(out),depend(minmn) :: s
+    <ftype2> dimension(u0,u1),intent(out),depend(u0, u1) :: u
+    <ftype2> dimension(vt0,vt1),intent(out),depend(vt0, vt1) :: vt
+    <ftype2> dimension(lwork),intent(hide,cache),depend(lwork) :: work
+    integer optional,intent(in),depend(minmn,compute_uv) &
+        :: lwork = max((compute_uv?4*minmn*minmn+MAX(m,n)+9*minmn:MAX(14*minmn+4,10*minmn+2+25*(25+8))+MAX(m,n)),1)
+    integer intent(hide,cache),dimension(8*minmn),depend(minmn) :: iwork
+    integer intent(out)::info
+
+end subroutine scipy_<prefix2>gesdd
+
+subroutine scipy_<prefix2>gesdd_lwork(m,n,minmn,u0,vt0,a,compute_uv,full_matrices,u,s,vt,work,lwork,iwork,info)
+    ! LWORK computation for (S/D)GESDD
+
+    fortranname scipy_<prefix2>gesdd
+    callstatement (*f2py_func)((compute_uv?(full_matrices?"A":"S"):"N"),&m,&n,&a,&m,&s,&u,&u0,&vt,&vt0,&work,&lwork,&iwork,&info)
+    callprotoargument char*,F_INT*,F_INT*,<ctype2>*,F_INT*,<ctype2>*,<ctype2>*,F_INT*,<ctype2>*,F_INT*,<ctype2>*,F_INT*,F_INT*,F_INT*
+
+    integer intent(in),optional,check(compute_uv==0||compute_uv==1):: compute_uv = 1
+    integer intent(in),optional,check(full_matrices==0||full_matrices==1):: full_matrices = 1
+    integer intent(in) :: m
+    integer intent(in) :: n
+    integer intent(hide),depend(m,n):: minmn = MIN(m,n)
+    integer intent(hide),depend(compute_uv,minmn) :: u0 = (compute_uv?m:1)
+    integer intent(hide),depend(compute_uv,minmn, full_matrices) :: vt0 = (compute_uv?(full_matrices?n:minmn):1)
+    <ftype2> intent(hide) :: a
+    <ftype2> intent(hide) :: s
+    <ftype2> intent(hide) :: u
+    <ftype2> intent(hide) :: vt
+    <ftype2> intent(out) :: work
+    integer intent(hide) :: lwork = -1
+    integer intent(hide) :: iwork
+    integer intent(out) :: info
+
+end subroutine scipy_<prefix2>gesdd_lwork
 
 end interface
 

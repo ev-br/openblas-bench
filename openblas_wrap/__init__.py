@@ -1,11 +1,9 @@
 """
-Empty dummy proj
+Trampoline to hide the LAPACK details (scipy.lapack.linalg or scipy_openblas32 or...)
+from benchmarking.
 """
 
 __version__ = "0.1"  
-
-
-num_reps = 8
 
 
 #from scipy.linalg.blas import (
@@ -22,5 +20,7 @@ from ._flapack import (
 #from scipy.linalg.lapack import (
 from ._flapack import (
     # linalg.solve
-    scipy_dgesv as dgesv
+    scipy_dgesv as dgesv,
+    # linalg.svd
+    scipy_dgesdd as dgesdd, scipy_dgesdd_lwork as dgesdd_lwork,
 )

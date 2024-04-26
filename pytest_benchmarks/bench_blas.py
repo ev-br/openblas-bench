@@ -6,7 +6,8 @@ from openblas_wrap import (
     # level 3
     dgemm, dsyrk,
     # lapack
-    dgesv
+    dgesv,
+    dgesdd, dgesdd_lwork,
 )
 
 # ### BLAS level 1 ###
@@ -126,5 +127,31 @@ def test_gesv(benchmark, n):
     assert lu is a
     assert x is b
     assert info == 0
+
+
+# linalg.svd
+
+gesdd_sizes = [(100, 5), (1000, 222)]
+
+
+def run_gesdd(a, lwork):
+    res = dgesdd(a, lwork=lwork, full_matrices=False, overwrite_a=False)
+    return res
+
+
+@pytest.mark.parametrize('mn', gesdd_sizes)
+def test_gesdd(benchmark, mn):
+    m, n = mn
+    rndm = np.random.RandomState(1234)
+    a = np.array(rndm.uniform(size=(m, n)), dtype=float, order='F')
+
+    lwork, info = dgesdd_lwork(m, n)
+    lwork = int(lwork)
+    assert info == 0
+
+    u, s, vt, info = benchmark(run_gesdd, a, lwork)
+
+    assert info == 0
+    np.testing.assert_allclose(u @ np.diag(s) @ vt, a, atol=1e-13)
 
 
