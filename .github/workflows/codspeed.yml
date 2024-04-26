@@ -27,6 +27,7 @@ jobs:
           pip install --user -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
           python -c "import scipy_openblas32 as o; print(f'{o.__version__ = }')"
           python -c "import scipy_openblas32 as o; pc = o.get_pkg_config(); f = open('scipy-openblas.pc', 'w'); f.write(pc)"
+          cat scipy-openblas.pc
 
       - name: Install dependencies
         run: pip install meson ninja numpy pytest pytest-codspeed --user  # XXX build numpy instead
