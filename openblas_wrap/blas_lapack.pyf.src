@@ -1,0 +1,214 @@
+!
+! Taken from scipy/linalg
+!
+! Shorthand notations
+!
+! <tchar=s,d,cs,zd>
+! <tchar2c=cs,zd>
+!
+! <prefix2=s,d>
+! <prefix2c=c,z>
+! <prefix3=s,sc>
+! <prefix4=d,dz>
+! <prefix6=s,d,c,z,c,z>
+!
+! <ftype2=real,double precision>
+! <ftype2c=complex,double complex>
+! <ftype3=real,complex>
+! <ftype4=double precision,double complex>
+! <ftypereal3=real,real>
+! <ftypereal4=double precision,double precision>
+! <ftype6=real,double precision,complex,double complex,\2,\3>
+! <ftype6creal=real,double precision,complex,double complex,\0,\1>
+!
+! <ctype2=float,double>
+! <ctype2c=complex_float,complex_double>
+! <ctype3=float,complex_float>
+! <ctype4=double,complex_double>
+! <ctypereal3=float,float>
+! <ctypereal4=double,double>
+! <ctype6=float,double,complex_float,complex_double,\2,\3>
+! <ctype6creal=float,double,complex_float,complex_double,\0,\1>
+!
+!
+! Level 1 BLAS
+!
+
+
+python module _flapack
+    usercode '''
+#define F_INT int
+'''
+
+interface
+
+
+subroutine scipy_<prefix>axpy(n,a,x,offx,incx,y,offy,incy)
+  ! Calculate z = a*x+y, where a is scalar.
+
+  callstatement (*f2py_func)(&n,&a,x+offx,&incx,y+offy,&incy)
+  callprotoargument F_INT*,<ctype>*,<ctype>*,F_INT*,<ctype>*,F_INT*
+
+  <ftype> dimension(*), intent(in) :: x
+  <ftype> dimension(*), intent(in,out,out=z) :: y
+  <ftype> optional, intent(in):: a=<1.0,\0,(1.0\,0.0),\2>
+  integer optional, intent(in),check(incx>0||incx<0) :: incx = 1
+  integer optional, intent(in),check(incy>0||incy<0) :: incy = 1
+  integer optional, intent(in),depend(x) :: offx=0
+  integer optional, intent(in),depend(y) :: offy=0
+  check(offx>=0 && offx<len(x)) :: offx
+  check(offy>=0 && offy<len(y)) :: offy
+  integer optional, intent(in),depend(x,incx,offx,y,incy,offy) :: &
+       n = (len(x)-offx)/abs(incx)
+  check(len(x)-offx>(n-1)*abs(incx)) :: n
+  check(len(y)-offy>(n-1)*abs(incy)) :: n
+
+end subroutine <prefix>axpy
+
+function scipy_ddot(n,x,offx,incx,y,offy,incy) result (xy)
+  ! Computes a vector-vector dot product.
+
+  callstatement scipy_ddot_return_value = (*f2py_func)(&n,x+offx,&incx,y+offy,&incy)
+  callprotoargument F_INT*,double*,F_INT*,double*,F_INT*
+  intent(c) scipy_ddot
+  fortranname F_FUNC(scipy_ddot,DDOT)
+
+  double precision dimension(*), intent(in) :: x
+  double precision dimension(*), intent(in) :: y
+  double precision ddot,xy
+  integer optional, intent(in),check(incx>0||incx<0) :: incx = 1
+  integer optional, intent(in),check(incy>0||incy<0) :: incy = 1
+  integer optional, intent(in),depend(x) :: offx=0
+  integer optional, intent(in),depend(y) :: offy=0
+  check(offx>=0 && offx<len(x)) :: offx
+  check(offy>=0 && offy<len(y)) :: offy
+  integer optional, intent(in),depend(x,incx,offx,y,incy,offy) :: &
+       n = (len(x)-offx)/abs(incx)
+  check(len(x)-offx>(n-1)*abs(incx)) :: n
+  check(len(y)-offy>(n-1)*abs(incy)) :: n
+
+end function ddot
+
+
+function scipy_<prefix4>nrm2(n,x,offx,incx) result(n2)
+
+  <ftypereal4> <prefix4>nrm2, n2
+
+  callstatement scipy_<prefix4>nrm2_return_value = (*f2py_func)(&n,x+offx,&incx)
+  callprotoargument F_INT*,<ctype4>*,F_INT*
+  intent(c) scipy_<prefix4>nrm2
+  fortranname F_FUNC(scipy_<prefix4>nrm2,<D,DZ>NRM2)
+
+  <ftype4> dimension(*),intent(in) :: x
+
+  integer optional, intent(in),check(incx>0) :: incx = 1
+
+  integer optional,intent(in),depend(x) :: offx=0
+  check(offx>=0 && offx<len(x)) :: offx
+
+  integer optional,intent(in),depend(x,incx,offx) :: n = (len(x)-offx)/abs(incx)
+  check(len(x)-offx>(n-1)*abs(incx)) :: n
+
+end function <prefix4>nrm2
+
+!
+! Level 3 BLAS
+!
+
+
+subroutine scipy_<prefix>gemm(m,n,k,alpha,a,b,beta,c,trans_a,trans_b,lda,ka,ldb,kb)
+  ! Computes a scalar-matrix-matrix product and adds the result to a
+  ! scalar-matrix product.
+  !
+  ! c = gemm(alpha,a,b,beta=0,c=0,trans_a=0,trans_b=0,overwrite_c=0)
+  ! Calculate C <- alpha * op(A) * op(B) + beta * C
+
+  callstatement (*f2py_func)((trans_a?(trans_a==2?"C":"T"):"N"), &
+       (trans_b?(trans_b==2?"C":"T"):"N"),&m,&n,&k,&alpha,a,&lda,b,&ldb,&beta,c,&m)
+  callprotoargument char*,char*,F_INT*,F_INT*,F_INT*,<ctype>*,<ctype>*,F_INT*,<ctype>*, &
+       F_INT*,<ctype>*,<ctype>*,F_INT*
+
+  integer optional,intent(in),check(trans_a>=0 && trans_a <=2) :: trans_a = 0
+  integer optional,intent(in),check(trans_b>=0 && trans_b <=2) :: trans_b = 0
+  <ftype> intent(in) :: alpha
+  <ftype> intent(in),optional :: beta = <0.0,\0,(0.0\,0.0),\2>
+
+  <ftype> dimension(lda,ka),intent(in) :: a
+  <ftype> dimension(ldb,kb),intent(in) :: b
+  <ftype> dimension(m,n),intent(in,out,copy),depend(m,n),optional :: c
+  check(shape(c,0)==m && shape(c,1)==n) :: c
+
+  integer depend(a),intent(hide) :: lda = shape(a,0)
+  integer depend(a),intent(hide) :: ka = shape(a,1)
+  integer depend(b),intent(hide) :: ldb = shape(b,0)
+  integer depend(b),intent(hide) :: kb = shape(b,1)
+
+  integer depend(a,trans_a,ka,lda),intent(hide):: m = (trans_a?ka:lda)
+  integer depend(a,trans_a,ka,lda),intent(hide):: k = (trans_a?lda:ka)
+  integer depend(b,trans_b,kb,ldb,k),intent(hide),check(trans_b?kb==k:ldb==k) :: &
+       n = (trans_b?ldb:kb)
+
+end subroutine <prefix>gemm
+
+
+subroutine scipy_<prefix6><sy,\0,\0,\0,he,he>rk(n,k,alpha,a,beta,c,trans,lower,lda,ka)
+  !  performs one of the symmetric rank k operations
+  !     C := alpha*A*A**T + beta*C,  or   C := alpha*A**T*A + beta*C,
+  !
+  ! c = syrk(alpha,a,beta=0,c=0,trans=0,lower=0,overwrite_c=0)
+  !
+  callstatement (*f2py_func)((lower?"L":"U"), &
+        (trans?(trans==2?"C":"T"):"N"), &n,&k,&alpha,a,&lda,&beta,c,&n)
+  callprotoargument char*,char*,F_INT*,F_INT*,<ctype6>*,<ctype6>*,F_INT*,<ctype6>*, &
+        <ctype6>*,F_INT*
+
+  integer optional, intent(in),check(lower==0||lower==1) :: lower = 0
+  integer optional,intent(in),check(trans>=0 && trans <=2) :: trans = 0
+
+  <ftype6> intent(in) :: alpha
+  <ftype6> intent(in),optional :: beta = <0.0,\0,(0.0\,0.0),\2,\2,\2>
+
+  <ftype6> dimension(lda,ka),intent(in) :: a
+  <ftype6> dimension(n,n),intent(in,out,copy),depend(n),optional :: c
+  check(shape(c,0)==n && shape(c,1)==n) :: c
+
+  integer depend(a),intent(hide) :: lda = shape(a,0)
+  integer depend(a),intent(hide) :: ka = shape(a,1)
+
+  integer depend(a, trans, ka, lda), intent(hide) :: n = (trans ? ka : lda)
+  integer depend(a, trans, ka, lda), intent(hide) :: k = (trans ? lda : ka)
+
+end subroutine <prefix6><sy,\0,\0,\0,he,he>rk
+
+
+!
+! LAPACK
+!
+
+subroutine scipy_<prefix>gesv(n,nrhs,a,piv,b,info)
+    ! lu,piv,x,info = gesv(a,b,overwrite_a=0,overwrite_b=0)
+    ! Solve A * X = B.
+    ! A = P * L * U
+    ! U is upper diagonal triangular, L is unit lower triangular,
+    ! piv pivots columns.
+
+    callstatement {F_INT i;(*f2py_func)(&n,&nrhs,a,&n,piv,b,&n,&info);for(i=0;i\<n;--piv[i++]);}
+    callprotoargument F_INT*,F_INT*,<ctype>*,F_INT*,F_INT*,<ctype>*,F_INT*,F_INT*
+
+    integer depend(a),intent(hide):: n = shape(a,0)
+    integer depend(b),intent(hide):: nrhs = shape(b,1)
+    <ftype> dimension(n,n),check(shape(a,0)==shape(a,1)) :: a
+    integer dimension(n),depend(n),intent(out) :: piv
+    <ftype> dimension(n,nrhs),check(shape(a,0)==shape(b,0)),depend(n) :: b
+    integer intent(out)::info
+    intent(in,out,copy,out=x) b
+    intent(in,out,copy,out=lu) a
+end subroutine <prefix>gesv
+
+
+end interface
+
+end python module _flapack
+
+
+
