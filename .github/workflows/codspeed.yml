@@ -28,6 +28,7 @@ jobs:
         run: |
           pip install --user -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
           python -c "import scipy_openblas32 as o; print(f'{o.__version__ = }')"
+          ls -l /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           python -c "import scipy_openblas32 as o; print(f'{o.__file__ = }')"
           python -c "import scipy_openblas32 as o; pc = o.get_pkg_config(); f = open('scipy-openblas.pc', 'w'); f.write(pc)"
 
@@ -48,7 +49,7 @@ jobs:
         run: |
           ls -l $PWD/build/openblas_wrap
           export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
-          #### export LD_LIBRARY_PATH= export LD_LIBRARY_PATH=/home/br/mambaforge/envs/bench-openb2/lib/python3.11/site-packages/scipy_openblas32/lib 
+          export LD_LIBRARY_PATH=/home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           cd pytest_benchmarks
           python -c 'import openblas_wrap as o; print(f"{o.__file__ = }")'
 
