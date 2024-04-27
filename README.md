@@ -4,6 +4,8 @@ Run periodically a set of benchmarks for low-level OpenBLAS primitives.
 
 ## Benchmark runner
 
+[![CodSpeed Badge](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/ev-br/openblas-bench)
+
 We rely on codspeed.io, which runs things on CI. Here is the dashboard: https://codspeed.io/ev-br/openblas-bench/
 
 Click on [benchmarks](https://codspeed.io/ev-br/openblas-bench/benchmarks) to see the performance of a particular benchmark over time;
