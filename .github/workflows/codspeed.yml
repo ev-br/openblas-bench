@@ -45,6 +45,7 @@ jobs:
 
       - name: Check the wrapper is importable
         run: |
+          ls -l $PWD/build/openblas_wrap
           export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
           export LD_LIBRARY_PATH=$PWD/build/openblas_wrap
           cd pytest_benchmarks
