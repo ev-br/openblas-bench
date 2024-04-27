@@ -28,8 +28,8 @@ jobs:
         run: |
           pip install --user -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
           python -c "import scipy_openblas32 as o; print(f'{o.__version__ = }')"
-          ls -l /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           python -c "import scipy_openblas32 as o; print(f'{o.__file__ = }')"
+          ls -l /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           python -c "import scipy_openblas32 as o; pc = o.get_pkg_config(); f = open('scipy-openblas.pc', 'w'); f.write(pc)"
 
       - name: Install dependencies
@@ -56,7 +56,7 @@ jobs:
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v2
         env:
-          LD_LIBRARY_PATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+          LD_LIBRARY_PATH: /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           PYTHONPATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/
           OPENBLAS_NUM_THREADS: 1
         with:
