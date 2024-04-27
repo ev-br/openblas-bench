@@ -44,8 +44,11 @@ jobs:
           ### cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
 
       - name: Check the wrapper is importable
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+          PYTHONPATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/
         run: |
-          export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
+          # export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
           cd pytest_benchmarks
           python -c 'import openblas_wrap as o; print(f"{o.__file__ = }")'
 
