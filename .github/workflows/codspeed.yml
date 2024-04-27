@@ -1,9 +1,8 @@
 name: codspeed-benchmarks
 
 on:
-  push:
-    schedule:
-      - cron: "12 * * * *"
+  schedule:
+     - cron: "55 * * * *"
     branches:
       - "main" # or "master"
   pull_request:
