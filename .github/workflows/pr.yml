@@ -15,12 +15,4 @@ jobs:
       - uses: actions/checkout@v3
       - name: make a commit
         run: |
-            git config --global user.name "bot"
-            git config --global user.email "no@email.com"
-            export BRANCHNAME=empty`date +%s`
-            git checkout -b $BRANCHNAME
-            date > date.txt
-            git commit -am'automated commit'
-            git log
-       - name: Send a PR
-         run: gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
+           echo "oops"
