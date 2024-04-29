@@ -23,3 +23,5 @@ jobs:
            date > date.txt
            echo $BRANCHNAME
            cat date.txt
+           git commit -am'automated commit'
+           git log
