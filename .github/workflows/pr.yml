@@ -1,21 +1,34 @@
-name: push a commit
+name: push-a-commit
+
+on:
   schedule:
-    - cron: "01 * * * *"
-permissions:
-  contents: write
+    - cron: "37 0 * * *"
+  pull_request:
+
 jobs:
   trigger:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
     steps:
       - uses: actions/checkout@v3
-      - name: Commit
+      - name: make a commit
         run: |
-            git config --global user.name "bot"
-            git config --global user.email "no@email.com"
-            export BRANCHNAME=empty`date +%s`
-            git checkout -b $BRANCHNAME
-            date > date.txt
-            git commit -am'automated commit'
-            git log
-       - name: Send a PR
-         run: gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
+           which git
+           git config --global user.name "bot"
+           git config --global user.email "no@email.com"
+           export BRANCHNAME=empty`date +%s`
+           git checkout -b $BRANCHNAME
+           date > date.txt
+           echo $BRANCHNAME
+           cat date.txt
+           git commit -am'automated commit'
+           git log trigger..$BRANCHNAME
+           gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
+        env:
+           GH_TOKEN: ${{ github.token }}
