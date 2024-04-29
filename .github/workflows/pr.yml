@@ -3,6 +3,7 @@ name: push-a-commit
 on:
   schedule:
     - cron: "37 0 * * *"
+  pull_request:
 
 jobs:
   benchmarks:
