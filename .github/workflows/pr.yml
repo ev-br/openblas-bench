@@ -28,7 +28,7 @@ jobs:
            echo $BRANCHNAME
            cat date.txt
            git commit -am'automated commit'
-           git log
+           git log trigger..$BRANCHNAME
            gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
         env:
            GH_TOKEN: ${{ github.token }}
