@@ -25,5 +25,4 @@ jobs:
            cat date.txt
            git commit -am'automated commit'
            git log
-       - name: Send a PR
-         run: gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
+           gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
