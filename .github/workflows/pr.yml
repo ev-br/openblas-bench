@@ -1,12 +1,17 @@
 name: push a commit
+
 on:
   schedule:
     - cron: "10 * * * *"
 permissions:
   contents: write
+
 jobs:
-  report:
-    runs-on: ubuntu-latest
+  benchmarks:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: make a commit
