@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  benchmarks:
+  trigger:
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -26,3 +26,5 @@ jobs:
            git commit -am'automated commit'
            git log
            gh pr create -B trigger -H $BRANCHNAME --title 'Merge' --body 'Created by a Github action'
+        env:
+           GH_TOKEN: ${{ github.token }}
