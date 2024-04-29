@@ -5,10 +5,11 @@ on:
 permissions:
   contents: write
 jobs:
+  report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Commit
+      - name: make a commit
         run: |
             git config --global user.name "bot"
             git config --global user.email "no@email.com"
