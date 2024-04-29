@@ -18,3 +18,8 @@ jobs:
            which git
            git config --global user.name "bot"
            git config --global user.email "no@email.com"
+           export BRANCHNAME=empty`date +%s`
+           git checkout -b $BRANCHNAME
+           date > date.txt
+           echo $BRANCHNAME
+           cat date.txt
