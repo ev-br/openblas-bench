@@ -15,4 +15,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: make a commit
         run: |
-           echo "oops"
+           which git
+           git config --global user.name "bot"
+           git config --global user.email "no@email.com"
