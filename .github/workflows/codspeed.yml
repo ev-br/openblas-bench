@@ -28,6 +28,8 @@ jobs:
         run: |
           pip install --user -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
           python -c "import scipy_openblas32 as o; print(f'{o.__version__ = }')"
+          python -c "import scipy_openblas32 as o; print(f'{o.__file__ = }')"
+          ls -l /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           python -c "import scipy_openblas32 as o; pc = o.get_pkg_config(); f = open('scipy-openblas.pc', 'w'); f.write(pc)"
 
       - name: Install dependencies
@@ -41,18 +43,23 @@ jobs:
           # This is needed because the build-install/_flapackXXX.so file
           # does not link to scipy_openblas32
           echo ">>> manually copy the .so from build -> build-install"
-          cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
+          ### cp build/openblas_wrap/*.so build-install/lib/python${{matrix.pyver}}/site-packages/openblas_wrap
 
       - name: Check the wrapper is importable
         run: |
+          ls -l $PWD/build/openblas_wrap
           export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
+          export LD_LIBRARY_PATH=/home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
           cd pytest_benchmarks
           python -c 'import openblas_wrap as o; print(f"{o.__file__ = }")'
 
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v2
+        env:
+          LD_LIBRARY_PATH: /home/runner/.local/lib/python3.12/site-packages/scipy_openblas32/lib
+          PYTHONPATH: ${{ github.workspace }}/build-install/lib/python${{matrix.pyver}}/site-packages/
+          OPENBLAS_NUM_THREADS: 1
         with:
           token: ${{ secrets.CODSPEED_TOKEN }}
           run: |
-            export PYTHONPATH=$PWD/build-install/lib/python${{matrix.pyver}}/site-packages/
-            OPENBLAS_NUM_THREADS=1 pytest pytest_benchmarks/bench_blas.py --codspeed
+            pytest pytest_benchmarks/bench_blas.py --codspeed
